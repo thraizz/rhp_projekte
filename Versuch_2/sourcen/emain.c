@@ -29,9 +29,20 @@ void emain(void* arg)
 	
 	// Hier die Treiberfunktionen aufrufen und testen (Aufgabe 1)
 	// ...
+    DSCB MyHandle;
+    BYTE MyDV;
+    Init(MyHandle,0x81);
+    InputByte(MyHandle,PD,MyDV);
+    InputByte(MyHandle,PC,MyDV);
+    InputByte(MyHandle,PB,MyDV);
+    InputByte(MyHandle,PA,MyDV);
 
+    OutputByte(MyHandle, PD, PA);
+    OutputByte(MyHandle, PC, PB);
+    OutputByte(MyHandle, PB, PC);
+    OutputByte(MyHandle, PA, PD);
 
-
+    Free(MyHandle);
 
 
 	// Ab hier beginnt die Endlosschleife fuer den Automaten (Aufgabe 2)
