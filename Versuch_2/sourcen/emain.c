@@ -23,29 +23,51 @@ void emain(void* arg)
 	// Hier alle benoetigten Variablen deklarieren
 	// ...
 
-
+    // VOR DEBUGGING RESTART & FREEZE AN, BEI BREAKPOINT FREEZE AUS
 	INIT_BM_WITH_REGISTER_UI; // Hier unbedingt einen Break-Point setzen !!!
 
 	
 	// Hier die Treiberfunktionen aufrufen und testen (Aufgabe 1)
 	// ...
-    DSCB MyHandle;
-    BYTE MyDV;
-    Init(MyHandle,0x81);
-    InputByte(MyHandle,PD,MyDV);
-    InputByte(MyHandle,PC,MyDV);
-    InputByte(MyHandle,PB,MyDV);
-    InputByte(MyHandle,PA,MyDV);
+    unsigned short int wert=1, *DigitalValue;
+    DigitalValue = &wert;
+    Init(GlobalBoardHandle,0x9A);
+    OutputByte(GlobalBoardHandle,PD,5);
+    OutputByte(GlobalBoardHandle,PC,6);
+    OutputByte(GlobalBoardHandle,PB,255);
+    OutputByte(GlobalBoardHandle,PA,255);
+    Init(GlobalBoardHandle, 0x9B);
+    InputByte(GlobalBoardHandle,PD,&wert); //PORT D  auslesen
+    printf("Wert in DigitalValue: ");
+    printf("%i",wert);
+    printf("\n");
+    InputByte(GlobalBoardHandle,PC,&wert); //PORT D  auslesen
+    printf("Wert in DigitalValue: ");
+    printf("%i",wert);
+    printf("\n");
+    InputByte(GlobalBoardHandle,PB,&wert); //PORT D  auslesen
+    printf("Wert in DigitalValue: ");
+    printf("%i",wert);
+    printf("\n");
+    InputByte(GlobalBoardHandle,PA,&wert); //PORT D  auslesen
+    printf("Wert in DigitalValue: ");
+    printf("%i",wert);
+    printf("\n");
 
-    OutputByte(MyHandle, PD, PA);
-    OutputByte(MyHandle, PC, PB);
-    OutputByte(MyHandle, PB, PC);
-    OutputByte(MyHandle, PA, PD);
+    Free(GlobalBoardHandle);
 
-    Free(MyHandle);
+    Init(GlobalBoardHandle, 0x9B);
+    OutputByte(GlobalBoardHandle, PA, 255);
+    Init(GlobalBoardHandle, 0x8B);
+    OutputByte(GlobalBoardHandle, PA, 255);
+    Init(GlobalBoardHandle, 0x80);
+    OutputByte(GlobalBoardHandle, PD, 255);
+    Free(GlobalBoardHandle);
+    exit(0);
 
 
-	// Ab hier beginnt die Endlosschleife fuer den Automaten (Aufgabe 2)
+
+    /** Ab hier beginnt die Endlosschleife fuer den Automaten (Aufgabe 2)
 	while(1) {
 
 		SYNC_SIM; 
@@ -65,7 +87,9 @@ void emain(void* arg)
 		// ...
 
 
-	} // while(1)..
+    }
+    **/
+    // while(1)..
 
 	
 }

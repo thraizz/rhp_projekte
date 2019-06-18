@@ -23,27 +23,35 @@ BYTE Init(DSCB BoardHandle, unsigned long int Steuerwort) {
         BoardHandle->Board_allocated=1;
         if((Steuerwort & 1)==1){
             BoardHandle->Port_D_Direction = 0;
+            io_out16(DIR1, (io_in16(DIR1)&0xff00));
         }
         else{
             BoardHandle->Port_D_Direction = 1;
+            io_out16(DIR1, (io_in16(DIR1)|0xff00));
         }
-        if((Steuerwort & 8)==1){
+        if((Steuerwort & 8)==8){
             BoardHandle->Port_C_Direction = 0;
+            io_out16(DIR1,(io_in16(DIR1)&0xff00));
         }
         else{
             BoardHandle->Port_C_Direction = 1;
+            io_out16(DIR1,(io_in16(DIR1)|0x00ff));
         }
-        if((Steuerwort & 2)==1){
+        if((Steuerwort & 2)==2){
             BoardHandle->Port_B_Direction = 0;
+            io_out16(DIR0, (io_in16(DIR0)&0xff00));
         }
         else{
             BoardHandle->Port_B_Direction = 1;
+            io_out16(DIR0, (io_in16(DIR0)|0xff00));
         }
-        if((Steuerwort & 16)==1){
+        if((Steuerwort & 16)==16){
             BoardHandle->Port_A_Direction = 0;
+            io_out16(DIR0,(io_in16(DIR0)&0x0000));
         }
         else{
             BoardHandle->Port_A_Direction = 1;
+            io_out16(DIR0,(io_in16(DIR0)|0x00ff));
         }
 
 
@@ -52,26 +60,30 @@ BYTE Init(DSCB BoardHandle, unsigned long int Steuerwort) {
 }
 
 BYTE InputByte(DSCB BoardHandle, BYTE Port, BYTE *DigitalValue) {
-	 
+    short int t;
     if(BoardHandle->Board_allocated==1){
         if(Port==PA && BoardHandle->Port_A_Direction==0){
-            DigitalValue = io_in16(IN0);
-            DigitalValue = (DigitalValue & 127); //Filtern des oberen Byte
+            t = io_in16(OUT0);
+            t = (t & 0xFF);
+            *DigitalValue = t; //Filtern des oberen Byte
         }
 
         else if(Port==PB && BoardHandle->Port_B_Direction==0){
-            DigitalValue = io_in16(IN0);
-            DigitalValue = (DigitalValue & (127<<8));
+            t = io_in16(OUT0);
+            t = (t & 0xFF00);
+            *DigitalValue = t>>8;
         }
 
         else if(Port==PC && BoardHandle->Port_C_Direction==0){
-            DigitalValue = io_in16(IN1);
-            DigitalValue = (DigitalValue & 127);
+            t = io_in16(OUT1);
+            t = (t & 0xFF);
+            *DigitalValue = t;
         }
 
         else if(Port==PD && BoardHandle->Port_D_Direction==0){
-            DigitalValue = io_in16(IN1);
-            DigitalValue = (DigitalValue & (127<<8));
+            t = io_in16(OUT1);
+            t = (t & 0xFF00);
+            *DigitalValue = t>>8;
         }
 
         else{ // Port ungültig oder falsch konfiguriert
@@ -85,40 +97,38 @@ BYTE InputByte(DSCB BoardHandle, BYTE Port, BYTE *DigitalValue) {
 }
 
 BYTE OutputByte(DSCB BoardHandle, BYTE Port, BYTE DigitalValue) {
-    short int t;
+    unsigned short int t;
     if(BoardHandle->Board_allocated==1){
         if(Port==PA){
             if(BoardHandle->Port_A_Direction==0){
                 return 3;
             }
-            t = (io_in16(IN0) >> 8); //t ist der zu erhaltene obere Byte
-            t = t & 127; // Bereinige alles außer oberer Byte der jetzt unten steht
-            t = (t << 8) | DigitalValue; // Shifte oberen Byte zurück nach oben, schreibe unteren Byte
+            t = (io_in16(OUT0) & 0xFF00); //t ist der zu erhaltene obere Byte
+            t = t | (0xFF & DigitalValue); // Shifte oberen Byte zurück nach oben, schreibe unteren Byte
             io_out16(OUT0,t); //Schreibe gesamten Inhalt
         }
         else if(Port==PB){
             if(BoardHandle->Port_B_Direction==0){
                 return 3;
             }
-            t = (io_in16(IN0) & 127); //t ist der zu erhaltene untere Byte, bereinige oberen Byte
-            t = t  | (DigitalValue << 8); // Shifte oberen Byte zurück nach oben, schreibe unteren Byte
+            t = (io_in16(OUT0) & 0xFF); //t ist der zu erhaltene untere Byte, bereinige oberen Byte
+            t = t  | (0xFF00 & (DigitalValue << 8)); // Shifte oberen Byte zurück nach oben, schreibe unteren Byte
             io_out16(OUT0,t); //Schreibe gesamten Inhalt
         }
         else if(Port==PC){
             if(BoardHandle->Port_C_Direction==0){
                 return 3;
             }
-            t = (io_in16(IN1) >> 8);
-            t = t & 127;
-            t = (t << 8) | DigitalValue;
+            t = (io_in16(OUT1) & 0xFF00);
+            t = t | (0xFF & DigitalValue);
             io_out16(OUT1,t)
         }
         else if(Port==PD){
             if(BoardHandle->Port_D_Direction==0){
                 return 3;
             }
-            t = (io_in16(IN1) & 127);
-            t = t  | (DigitalValue << 8);
+            t = (io_in16(OUT1) & 0xFF);
+            t = t  | (0xFF00 & (DigitalValue<<8));
             io_out16(OUT1,t);
         }
         else{
@@ -132,7 +142,7 @@ BYTE OutputByte(DSCB BoardHandle, BYTE Port, BYTE DigitalValue) {
 BYTE Free(DSCB BoardHandle) {
 
     if(BoardHandle->Board_allocated==1){
-        ~BoardHandle;
+        BoardHandle->Board_allocated = 0;
         return 0;
     }
     return 1;
