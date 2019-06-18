@@ -60,7 +60,7 @@ BYTE Init(DSCB BoardHandle, unsigned long int Steuerwort) {
 }
 
 BYTE InputByte(DSCB BoardHandle, BYTE Port, BYTE *DigitalValue) {
-    short int t;
+    int t;
     if(BoardHandle->Board_allocated==1){
         if(Port==PA && BoardHandle->Port_A_Direction==0){
             t = io_in16(OUT0);
