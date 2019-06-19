@@ -1,12 +1,12 @@
-﻿#include "simuc.h"
+#include "simuc.h"
 #include "io_treiber.h"
 
 typedef struct BHandle_Data {
-	BYTE Board_allocated;	// 1=allocated, 0=free
-	BYTE Port_A_Direction;	// 1=Output, 0=Input
-	BYTE Port_B_Direction;
-	BYTE Port_C_Direction;
-	BYTE Port_D_Direction;
+    BYTE Board_allocated;	// 1=allocated, 0=free
+    BYTE Port_A_Direction;	// 1=Output, 0=Input
+    BYTE Port_B_Direction;
+    BYTE Port_C_Direction;
+    BYTE Port_D_Direction;
 } BHandle;
 
 
@@ -63,25 +63,25 @@ BYTE InputByte(DSCB BoardHandle, BYTE Port, BYTE *DigitalValue) {
     int t;
     if(BoardHandle->Board_allocated==1){
         if(Port==PA && BoardHandle->Port_A_Direction==0){
-            t = io_in16(OUT0);
-            t = (t & 0xFF);
-            *DigitalValue = t; //Filtern des oberen Byte
+            t = io_in16(IN0);
+            t = (t & 0xFF); //Filtern des oberen Byte
+            *DigitalValue = t;
         }
 
         else if(Port==PB && BoardHandle->Port_B_Direction==0){
-            t = io_in16(OUT0);
+            t = io_in16(IN0);
             t = (t & 0xFF00);
             *DigitalValue = t>>8;
         }
 
         else if(Port==PC && BoardHandle->Port_C_Direction==0){
-            t = io_in16(OUT1);
+            t = io_in16(IN1);
             t = (t & 0xFF);
             *DigitalValue = t;
         }
 
         else if(Port==PD && BoardHandle->Port_D_Direction==0){
-            t = io_in16(OUT1);
+            t = io_in16(IN1);
             t = (t & 0xFF00);
             *DigitalValue = t>>8;
         }
